@@ -24,7 +24,7 @@ commands:
       - run:
           name: install package dependencies
           command: |
-            dpkg -i vendor/apt/archives/*.deb
+            dpkg --force-all -i vendor/apt/archives/*.deb
       - run:
           name: run tests
           command: |
@@ -40,7 +40,7 @@ commands:
       - run:
           name: install package dependencies
           command: |
-            dpkg -i vendor/apt/archives/*.deb
+            dpkg --force-all -i vendor/apt/archives/*.deb
       - run:
           name: download firefox
           command: |
@@ -142,12 +142,12 @@ commands:
       - run:
           name: install package dependencies
           command: |
-            dpkg -i vendor/apt/archives/*.deb
+            dpkg --force-all -i vendor/apt/archives/*.deb
       - run:
           name: download chrome
           command: |
             wget -O ~/chrome.deb https://dl.google.com/linux/direct/google-chrome-beta_current_amd64.deb
-            dpkg -i ~/chrome.deb
+            dpkg --force-all -i ~/chrome.deb
       - run:
           name: run tests
           environment:
@@ -186,7 +186,7 @@ jobs:
       - run:
           name: install package dependencies
           command: |
-            dpkg -i vendor/apt/archives/*.deb
+            dpkg --force-all -i vendor/apt/archives/*.deb
       - run:
           name: install emsdk
           command: |
