@@ -24,7 +24,7 @@ commands:
       - run:
           name: install package dependencies
           command: |
-            sudo dpkg -i vendor/apt/archives/*.deb
+            dpkg -i vendor/apt/archives/*.deb
       - run:
           name: run tests
           command: |
@@ -40,7 +40,7 @@ commands:
       - run:
           name: install package dependencies
           command: |
-            sudo dpkg -i vendor/apt/archives/*.deb
+            dpkg -i vendor/apt/archives/*.deb
       - run:
           name: download firefox
           command: |
@@ -142,7 +142,7 @@ commands:
       - run:
           name: install package dependencies
           command: |
-            sudo dpkg -i vendor/apt/archives/*.deb
+            dpkg -i vendor/apt/archives/*.deb
       - run:
           name: download chrome
           command: |
@@ -182,13 +182,13 @@ jobs:
             echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections
             apt-get install --download-only -q -y dbus-x11 firefox menu openbox ttf-mscorefonts-installer xinit xserver-xorg xserver-xorg-video-dummy
             # move downloaded debs to our cache directory
-            sudo cp -R /var/cache/apt vendor/
+            cp -R /var/cache/apt vendor/
             # make sure our user has ownership of the cache
-            sudo chown -R ubuntu:ubuntu vendor/apt
+            chown -R ubuntu:ubuntu vendor/apt
       - run:
           name: install package dependencies
           command: |
-            sudo dpkg -i vendor/apt/archives/*.deb
+            dpkg -i vendor/apt/archives/*.deb
       - run:
           name: install emsdk
           command: |
@@ -494,25 +494,25 @@ workflows:
       - test-sanity:
           requires:
             - build
-      - build-upstream
-      - test-upstream-wasm0:
-          requires:
-            - build-upstream
-      - test-upstream-wasm2:
-          requires:
-            - build-upstream
-      - test-upstream-wasm3:
-          requires:
-            - build-upstream
-      - test-upstream-wasm2js1:
-          requires:
-            - build-upstream
-      - test-upstream-other:
-          requires:
-            - build-upstream
-      - test-upstream-browser-chrome:
-          requires:
-            - build-upstream
-      - test-upstream-browser-firefox:
-          requires:
-            - build-upstream
+      #- build-upstream
+      #- test-upstream-wasm0:
+      #    requires:
+      #      - build-upstream
+      #- test-upstream-wasm2:
+      #    requires:
+      #      - build-upstream
+      #- test-upstream-wasm3:
+      #    requires:
+      #      - build-upstream
+      #- test-upstream-wasm2js1:
+      #    requires:
+      #      - build-upstream
+      #- test-upstream-other:
+      #    requires:
+      #      - build-upstream
+      #- test-upstream-browser-chrome:
+      #    requires:
+      #      - build-upstream
+      #- test-upstream-browser-firefox:
+      #    requires:
+      #      - build-upstream
