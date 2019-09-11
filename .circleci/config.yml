@@ -170,6 +170,7 @@ jobs:
       - checkout
       - run:
           name: download debs
+          command: |
             mkdir -p vendor/apt
             apt-get update -q
             apt-get install --download-only -q -y python3 cmake build-essential openjdk-8-jre-headless
