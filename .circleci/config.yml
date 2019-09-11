@@ -183,8 +183,6 @@ jobs:
             apt-get install --download-only -q -y dbus-x11 firefox menu openbox ttf-mscorefonts-installer xinit xserver-xorg xserver-xorg-video-dummy
             # move downloaded debs to our cache directory
             cp -R /var/cache/apt vendor/
-            # make sure our user has ownership of the cache
-            chown -R ubuntu:ubuntu vendor/apt
       - run:
           name: install package dependencies
           command: |
