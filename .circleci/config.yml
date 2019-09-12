@@ -224,7 +224,7 @@ jobs:
             - .emscripten_cache/
             - .emscripten_ports/
             - .emscripten
-            - vendor/apt
+            - vendor/
   build-docs:
     executor: bionic
     steps:
