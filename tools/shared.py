@@ -1853,8 +1853,6 @@ class Building(object):
 
     cmd += [
       '--export',
-      '__wasm_call_ctors',
-      '--export',
       '__data_end'
     ]
     for export in Settings.EXPORTED_FUNCTIONS:
@@ -1870,8 +1868,9 @@ class Building(object):
       cmd += [
         '-z', 'stack-size=%s' % Settings.TOTAL_STACK,
         '--initial-memory=%d' % Settings.TOTAL_MEMORY,
-        '--no-entry'
       ]
+      if '_main' not in Settings.EXPORTED_FUNCTIONS:
+        cmd += ['--no-entry', '--export', '__wasm_call_ctors']
       if Settings.WASM_MEM_MAX != -1:
         cmd.append('--max-memory=%d' % Settings.WASM_MEM_MAX)
       elif not Settings.ALLOW_MEMORY_GROWTH:

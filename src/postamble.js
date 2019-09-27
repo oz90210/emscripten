@@ -158,6 +158,10 @@ function ExitStatus(status) {
 
 var calledMain = false;
 
+#if WASM_BACKEND && MAIN_READS_PARAMS
+var mainArgs = undefined;
+#endif
+
 dependenciesFulfilled = function runCaller() {
   // If run has never been called, and we should call run (INVOKE_RUN is true, and Module.noInitialRun is not false)
   if (!calledRun) run();
@@ -174,10 +178,17 @@ function callMain(args) {
 #if MAIN_MODULE
   // Main modules can't tell if they have main() at compile time, since it may
   // arrive from a dynamic library.
+#if WASM_BACKEND
+  if (!Module['_start']) return;
+#else
   if (!Module['_main']) return;
+#endif
 #endif
 
 #if MAIN_READS_PARAMS
+#if WASM_BACKEND
+  mainArgs = [thisProgram].concat(args)
+#else
   args = args || [];
 
   var argc = args.length+1;
@@ -190,6 +201,7 @@ function callMain(args) {
 #else
   var argc = 0;
   var argv = 0;
+#endif // WASM_BACKEND
 #endif // MAIN_READS_PARAMS
 
 #if EMTERPRETIFY_ASYNC
@@ -209,6 +221,11 @@ function callMain(args) {
     // User requested the PROXY_TO_PTHREAD option, so call a stub main which pthread_create()s a new thread
     // that will call the user's real main() for the application.
     var ret = Module['_proxy_main'](argc, argv);
+#else if WASM_BACKEND
+    // _start (in crt1.c) will call exit after running main if main returns
+    // non-zero.
+    var ret = 0;
+    Module['__start']();
 #else
     var ret = Module['_main'](argc, argv);
 #endif

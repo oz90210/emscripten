@@ -2045,6 +2045,8 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
 
     ## Continue on to create JavaScript
 
+    linker_inputs.insert(0, system_libs.Library.get_usable_variations()['crt1'].get_path())
+
     with ToolchainProfiler.profile_block('calculate system libraries'):
       # link in ports and system libraries, if necessary
       if not LEAVE_INPUTS_RAW and \

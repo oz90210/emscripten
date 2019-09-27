@@ -9,6 +9,9 @@
 
 assert(!LibraryManager.library);
 LibraryManager.library = {
+  emscripten_get_heap_size: function() {
+    return HEAP8.length;
+  },
   sysconf: function(name) {
     assert(name == 30); 
     return PAGE_SIZE;

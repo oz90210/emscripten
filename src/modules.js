@@ -66,7 +66,8 @@ var LibraryManager = {
       'library_signals.js',
       'library_syscall.js',
       'library_html5.js',
-      'library_stack_trace.js'
+      'library_stack_trace.js',
+      'library_wasi.js'
     ];
 
     if (!DISABLE_EXCEPTION_THROWING) {
@@ -152,11 +153,9 @@ var LibraryManager = {
       libraries.push('library_glemu.js');
     }
 
-    libraries.push('library_wasi.js');
-
     libraries = libraries.concat(additionalLibraries);
 
-    if (BOOTSTRAPPING_STRUCT_INFO) libraries = ['library_bootstrap_structInfo.js', 'library_formatString.js'];
+    if (BOOTSTRAPPING_STRUCT_INFO) libraries = ['library_bootstrap_structInfo.js', 'library_formatString.js', 'library_wasi.js'];
     if (ONLY_MY_CODE) {
       libraries.length = 0;
       LibraryManager.library = {};
