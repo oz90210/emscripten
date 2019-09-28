@@ -17,8 +17,8 @@ size_t __stdio_write(FILE *f, const unsigned char *buf, size_t len)
 	for (;;) {
 #if __EMSCRIPTEN__
 		size_t num;
-		__wasi_errno_t error = __wasi_fd_write(f->fd, (struct __wasi_ciovec_t*)iov, iovcnt, &num);
-		if (error != __WASI_ESUCCESS) {
+		__wasi_errno_t err = __wasi_fd_write(f->fd, (struct __wasi_ciovec_t*)iov, iovcnt, &num);
+		if (err != __WASI_ESUCCESS) {
 				num = -1;
 		}
 		cnt = num;

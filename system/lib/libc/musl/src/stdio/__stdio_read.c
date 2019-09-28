@@ -14,7 +14,7 @@ size_t __stdio_read(FILE *f, unsigned char *buf, size_t len)
 
 #if __EMSCRIPTEN__
 	size_t num;
-	__wasi_errno_t error = __wasi_fd_read(f->fd, (struct __wasi_ciovec_t*)iov, iovcnt, &num);
+	__wasi_errno_t err = __wasi_fd_read(f->fd, (struct __wasi_iovec_t*)iov, 2, &num);
 	if (err != __WASI_ESUCCESS) {
 		num = -1;
 	}
