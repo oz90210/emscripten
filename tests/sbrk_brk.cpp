@@ -74,7 +74,9 @@ void myfree(void *ptr)
 
 int main()
 {
-#define N 3000 // Arbitrary amount that fits within the default 16MB heap
+  assert(sbrk(0)); // sbrk must be properly initialized
+
+  #define N 3000 // Arbitrary amount that fits within the default 16MB heap
 
 	uint8_t *data[N];
 	for(int i = 0; i < N; ++i)
