@@ -32,11 +32,11 @@ void abort() {
 // mmap support is nonexistent. TODO: emulate simple mmaps using
 // stdio + malloc, which is slow but may help some things?
 
-int __map_file(int, int) {
+int __map_file(int x, int y) {
   return ENOSYS;
 }
 
-int __syscall91(int, int) { // munmap
+int __syscall91(int x, int y) { // munmap
   return ENOSYS;
 }
 

@@ -1420,7 +1420,7 @@ var SyscallsLibrary = {
       var ptr = {{{ makeGetValue('iov', 'i*8', 'i32') }}};
       var len = {{{ makeGetValue('iov', 'i*8 + 4', 'i32') }}};
       for (var j = 0; j < len; j++) {
-        SYSCALLS.printChar(stream, HEAPU8[ptr+j]);
+        SYSCALLS.printChar(fd, HEAPU8[ptr+j]);
       }
       num += len;
     }
@@ -1435,8 +1435,8 @@ var SyscallsLibrary = {
     return 0;
   },
   fd_close: function(fd) {
-    var stream = FS.getStream(stream);
 #if SYSCALLS_REQUIRE_FILESYSTEM
+    var stream = FS.getStream(stream);
     FS.close(stream);
 #else
 #if ASSERTIONS
@@ -1446,8 +1446,8 @@ var SyscallsLibrary = {
     return 0;
   },
   fd_seek: function(fd, offset_low, offset_high, whence, newOffset) {
-    var stream = FS.getStream(stream);
 #if SYSCALLS_REQUIRE_FILESYSTEM
+    var stream = FS.getStream(stream);
     var HIGH_OFFSET = 0x100000000; // 2^32
     // use an unsigned operator on low and shift high by 32-bits
     var offset = offset_high * HIGH_OFFSET + (offset_low >>> 0);
