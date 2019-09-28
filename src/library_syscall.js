@@ -1436,7 +1436,7 @@ var SyscallsLibrary = {
   },
   fd_close: function(fd) {
 #if SYSCALLS_REQUIRE_FILESYSTEM
-    var stream = FS.getStream(stream);
+    var stream = FS.getStream(fd);
     FS.close(stream);
 #else
 #if ASSERTIONS
@@ -1447,7 +1447,7 @@ var SyscallsLibrary = {
   },
   fd_seek: function(fd, offset_low, offset_high, whence, newOffset) {
 #if SYSCALLS_REQUIRE_FILESYSTEM
-    var stream = FS.getStream(stream);
+    var stream = FS.getStream(fd);
     var HIGH_OFFSET = 0x100000000; // 2^32
     // use an unsigned operator on low and shift high by 32-bits
     var offset = offset_high * HIGH_OFFSET + (offset_low >>> 0);
