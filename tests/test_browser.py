@@ -125,6 +125,7 @@ def requires_threads(f):
 
 def requires_asmfs(f):
   def decorated(self, *args, **kwargs):
+    # https://github.com/emscripten-core/emscripten/issues/9534
     self.skipTest('ASMFS is looking for a maintainer')
     return f(self, *args, **kwargs)
 
