@@ -1,5 +1,8 @@
 #include "stdio_impl.h"
 #include <sys/uio.h>
+#ifdef __EMSCRIPTEN__
+#include <wasi/wasi.h>
+#endif
 
 size_t __stdio_read(FILE *f, unsigned char *buf, size_t len)
 {
@@ -9,7 +12,16 @@ size_t __stdio_read(FILE *f, unsigned char *buf, size_t len)
 	};
 	ssize_t cnt;
 
+#if __EMSCRIPTEN__
+	size_t num;
+	__wasi_errno_t error = __wasi_fd_read(f->fd, (struct __wasi_ciovec_t*)iov, iovcnt, &num);
+	if (err != __WASI_ESUCCESS) {
+		num = -1;
+	}
+	cnt = num;
+#else
 	cnt = syscall(SYS_readv, f->fd, iov, 2);
+#endif
 	if (cnt <= 0) {
 		f->flags |= F_EOF ^ ((F_ERR^F_EOF) & cnt);
 		return cnt;
