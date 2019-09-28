@@ -307,17 +307,6 @@ var SyscallsLibrary = {
     var stream = FS.open(pathname, flags, mode);
     return stream.fd;
   },
-  __syscall6: function(which, varargs) { // close
-    var stream = SYSCALLS.getStreamFromFD();
-#if SYSCALLS_REQUIRE_FILESYSTEM
-    FS.close(stream);
-#else
-#if ASSERTIONS
-    abort('it should not be possible to operate on streams when !SYSCALLS_REQUIRE_FILESYSTEM');
-#endif
-#endif
-    return 0;
-  },
   __syscall9: function(which, varargs) { // link
     var oldpath = SYSCALLS.get(), newpath = SYSCALLS.get();
     return -{{{ cDefine('EMLINK') }}}; // no hardlinks for us
@@ -816,29 +805,6 @@ var SyscallsLibrary = {
     FS.chdir(stream.path);
     return 0;
   },
-  __syscall140: function(which, varargs) { // llseek
-    var stream = SYSCALLS.getStreamFromFD(), offset_high = SYSCALLS.get(), offset_low = SYSCALLS.get(), result = SYSCALLS.get(), whence = SYSCALLS.get();
-#if SYSCALLS_REQUIRE_FILESYSTEM
-    var HIGH_OFFSET = 0x100000000; // 2^32
-    // use an unsigned operator on low and shift high by 32-bits
-    var offset = offset_high * HIGH_OFFSET + (offset_low >>> 0);
-
-    var DOUBLE_LIMIT = 0x20000000000000; // 2^53
-    // we also check for equality since DOUBLE_LIMIT + 1 == DOUBLE_LIMIT
-    if (offset <= -DOUBLE_LIMIT || offset >= DOUBLE_LIMIT) {
-      return -{{{ cDefine('EOVERFLOW') }}};
-    }
-
-    FS.llseek(stream, offset, whence);
-    {{{ makeSetValue('result', '0', 'stream.position', 'i64') }}};
-    if (stream.getdents && offset === 0 && whence === {{{ cDefine('SEEK_SET') }}}) stream.getdents = null; // reset readdir state
-#else
-#if ASSERTIONS
-    abort('it should not be possible to operate on streams when !SYSCALLS_REQUIRE_FILESYSTEM');
-#endif
-#endif
-    return 0;
-  },
   __syscall142: function(which, varargs) { // newselect
     // readfds are supported,
     // writefds checks socket open status
@@ -928,10 +894,6 @@ var SyscallsLibrary = {
     if (!info) return 0;
     SYSCALLS.doMsync(addr, FS.getStream(info.fd), len, info.flags);
     return 0;
-  },
-  __syscall145: function(which, varargs) { // readv
-    var stream = SYSCALLS.getStreamFromFD(), iov = SYSCALLS.get(), iovcnt = SYSCALLS.get();
-    return SYSCALLS.doReadv(stream, iov, iovcnt);
   },
   __syscall147__deps: ['$PROCINFO'],
   __syscall147: function(which, varargs) { // getsid
@@ -1428,7 +1390,10 @@ var SyscallsLibrary = {
     return 0;
   },
 
-  // WASI (WebAssembly System Interface) call support
+  // WASI (WebAssembly System Interface) I/O support.
+  // This is the set of syscalls that use the FS etc. APIs. The rest is in
+  // library_wasi.js.
+
 #if SYSCALLS_REQUIRE_FILESYSTEM == 0
   $flush_NO_FILESYSTEM: function() {
     // flush anything remaining in the buffers during shutdown
@@ -1443,9 +1408,9 @@ var SyscallsLibrary = {
   fd_write__postset: '__ATEXIT__.push(flush_NO_FILESYSTEM);',
 #endif
 #endif
-  fd_write: function(stream, iov, iovcnt, pnum) {
+  fd_write: function(fd, iov, iovcnt, pnum) {
 #if SYSCALLS_REQUIRE_FILESYSTEM
-    stream = FS.getStream(stream);
+    var stream = FS.getStream(fd);
     if (!stream) throw new FS.ErrnoError({{{ cDefine('EBADF') }}});
     var num = SYSCALLS.doWritev(stream, iov, iovcnt);
 #else
@@ -1463,11 +1428,54 @@ var SyscallsLibrary = {
     {{{ makeSetValue('pnum', 0, 'num', 'i32') }}}
     return 0;
   },
-  // Fallback for cases where the wasi_unstable.name prefixing fails,
+  fd_read: function(fd, iov, iovcnt, pnum) {
+    var stream = FS.getStream(fd);
+    var num = SYSCALLS.doReadv(stream, iov, iovcnt);
+    {{{ makeSetValue('pnum', 0, 'num', 'i32') }}}
+    return 0;
+  },
+  fd_close: function(fd) {
+    var stream = FS.getStream(stream);
+#if SYSCALLS_REQUIRE_FILESYSTEM
+    FS.close(stream);
+#else
+#if ASSERTIONS
+    abort('it should not be possible to operate on streams when !SYSCALLS_REQUIRE_FILESYSTEM');
+#endif
+#endif
+    return 0;
+  },
+  fd_seek: function(fd, offset_low, offset_high, whence, newOffset) {
+    var stream = FS.getStream(stream);
+#if SYSCALLS_REQUIRE_FILESYSTEM
+    var HIGH_OFFSET = 0x100000000; // 2^32
+    // use an unsigned operator on low and shift high by 32-bits
+    var offset = offset_high * HIGH_OFFSET + (offset_low >>> 0);
+
+    var DOUBLE_LIMIT = 0x20000000000000; // 2^53
+    // we also check for equality since DOUBLE_LIMIT + 1 == DOUBLE_LIMIT
+    if (offset <= -DOUBLE_LIMIT || offset >= DOUBLE_LIMIT) {
+      return -{{{ cDefine('EOVERFLOW') }}};
+    }
+
+    FS.llseek(stream, offset, whence);
+    {{{ makeSetValue('newOffset', '0', 'stream.position', 'i64') }}};
+    if (stream.getdents && offset === 0 && whence === {{{ cDefine('SEEK_SET') }}}) stream.getdents = null; // reset readdir state
+#else
+#if ASSERTIONS
+    abort('it should not be possible to operate on streams when !SYSCALLS_REQUIRE_FILESYSTEM');
+#endif
+#endif
+    return 0;
+  },
+  // Fallbacks for cases where the wasi_unstable.name prefixing fails,
   // and we have the full name from C. This happens in fastcomp (which
   // lacks the attribute to set the import module and base names) and
   // in LTO mode (as bitcode does not preserve them).
   __wasi_fd_write: 'fd_write',
+  __wasi_fd_read: 'fd_read',
+  __wasi_fd_close: 'fd_close',
+  __wasi_fd_seek: 'fd_seek',
 };
 
 if (SYSCALL_DEBUG) {
