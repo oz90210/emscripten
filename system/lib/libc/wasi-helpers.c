@@ -14,7 +14,6 @@ int __wasi_syscall_ret(__wasi_errno_t code) {
   if (code == __WASI_ESUCCESS) return 0;
   // TODO: change musl internal codes to match wasis, so we can avoid this
   switch (code) {
-    case __WASI_ESUCCESS:         errno = ESUCCESS; break;
     case __WASI_E2BIG:            errno = E2BIG; break;
     case __WASI_EACCES:           errno = EACCES; break;
     case __WASI_EADDRINUSE:       errno = EADDRINUSE; break;
@@ -27,7 +26,7 @@ int __wasi_syscall_ret(__wasi_errno_t code) {
     case __WASI_EBUSY:            errno = EBUSY; break;
     case __WASI_ECANCELED:        errno = ECANCELED; break;
     case __WASI_ECHILD:           errno = ECHILD; break;
-    case __WASI_ECONNABORTED:     errno = ECONNACBORTED; break;
+    case __WASI_ECONNABORTED:     errno = ECONNABORTED; break;
     case __WASI_ECONNREFUSED:     errno = ECONNREFUSED; break;
     case __WASI_ECONNRESET:       errno = ECONNRESET; break;
     case __WASI_EDEADLK:          errno = EDEADLK; break;
@@ -35,7 +34,7 @@ int __wasi_syscall_ret(__wasi_errno_t code) {
     case __WASI_EDOM:             errno = EDOM; break;
     case __WASI_EDQUOT:           errno = EDQUOT; break;
     case __WASI_EEXIST:           errno = EEXIST; break;
-    case __WASI_EFAULT:           errno = EEFAULT; break;
+    case __WASI_EFAULT:           errno = EFAULT; break;
     case __WASI_EFBIG:            errno = EFBIG; break;
     case __WASI_EHOSTUNREACH:     errno = EHOSTUNREACH; break;
     case __WASI_EIDRM:            errno = EIDRM; break;
@@ -70,7 +69,7 @@ int __wasi_syscall_ret(__wasi_errno_t code) {
     case __WASI_ENOTCONN:         errno = ENOTCONN; break;
     case __WASI_ENOTDIR:          errno = ENOTDIR; break;
     case __WASI_ENOTEMPTY:        errno = ENOTEMPTY; break;
-    case __WASI_ENOTRECOVERABLE:  errno = ENORRECOVERABLE; break;
+    case __WASI_ENOTRECOVERABLE:  errno = ENOTRECOVERABLE; break;
     case __WASI_ENOTSOCK:         errno = ENOTSOCK; break;
     case __WASI_ENOTSUP:          errno = ENOTSUP; break;
     case __WASI_ENOTTY:           errno = ENOTTY; break;
@@ -87,10 +86,11 @@ int __wasi_syscall_ret(__wasi_errno_t code) {
     case __WASI_ESPIPE:           errno = ESPIPE; break;
     case __WASI_ESRCH:            errno = ESRCH; break;
     case __WASI_ESTALE:           errno = ESTALE; break;
-    case __WASI_ETIMEDOUT:        errno = ETIMEOUT; break;
     case __WASI_ETXTBSY:          errno = ETXTBSY; break;
     case __WASI_EXDEV:            errno = EXDEV; break;
-    case __WASI_ENOTCAPABLE:      errno = ENOTCAPABLE; break;
+    // codes with no musl value
+    case __WASI_ETIMEDOUT:
+    case __WASI_ENOTCAPABLE:
     default: abort();
   }
   return -1;
