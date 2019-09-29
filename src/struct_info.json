@@ -906,6 +906,8 @@
     {
         "file": "wasi/wasi.h",
         "defines": [
+            "__WASI_ESUCCESS",
+            "__WASI_EBADF",
             "__WASI_WHENCE_SET",
             "__WASI_WHENCE_CUR",
             "__WASI_WHENCE_END"

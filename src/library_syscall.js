@@ -193,8 +193,9 @@ var SyscallsLibrary = {
       return ret;
     },
 #if SYSCALLS_REQUIRE_FILESYSTEM
-    getStreamFromFD: function() {
-      var stream = FS.getStream(SYSCALLS.get());
+    getStreamFromFD: function(fd) {
+      if (!fd) fd = SYSCALLS.get();
+      var stream = FS.getStream(fd);
       if (!stream) throw new FS.ErrnoError({{{ cDefine('EBADF') }}});
 #if SYSCALL_DEBUG
       err('    (stream: "' + stream.path + '")');
@@ -219,7 +220,17 @@ var SyscallsLibrary = {
 #else
       SYSCALLS.get();
 #endif
-    }
+    },
+
+    getWasiCode: function(code) {
+      switch (code) {
+        case 0:                        return {{{ cDefine('__WASI_ESUCCESS') }}};
+        case {{{ cDefine('EBADF') }}}: return {{{ cDefine('__WASI_EBADF') }}};
+      }
+#if ASSERTIONS
+      abort("Unknown wasi code for " + code);
+#endif
+    },
   },
 
   _emscripten_syscall_mmap2__deps: ['memalign', 'memset', '$SYSCALLS',
@@ -1410,8 +1421,7 @@ var SyscallsLibrary = {
 #endif
   fd_write: function(fd, iov, iovcnt, pnum) {
 #if SYSCALLS_REQUIRE_FILESYSTEM
-    var stream = FS.getStream(fd);
-    if (!stream) throw new FS.ErrnoError({{{ cDefine('EBADF') }}});
+    var stream = SYSCALLS.getStreamFromFD(fd);
     var num = SYSCALLS.doWritev(stream, iov, iovcnt);
 #else
     // hack to support printf in SYSCALLS_REQUIRE_FILESYSTEM=0
@@ -1429,14 +1439,14 @@ var SyscallsLibrary = {
     return 0;
   },
   fd_read: function(fd, iov, iovcnt, pnum) {
-    var stream = FS.getStream(fd);
+    var stream = SYSCALLS.getStreamFromFD(fd);
     var num = SYSCALLS.doReadv(stream, iov, iovcnt);
     {{{ makeSetValue('pnum', 0, 'num', 'i32') }}}
     return 0;
   },
   fd_close: function(fd) {
 #if SYSCALLS_REQUIRE_FILESYSTEM
-    var stream = FS.getStream(fd);
+    var stream = SYSCALLS.getStreamFromFD(fd);
     FS.close(stream);
 #else
 #if ASSERTIONS
@@ -1447,7 +1457,7 @@ var SyscallsLibrary = {
   },
   fd_seek: function(fd, offset_low, offset_high, whence, newOffset) {
 #if SYSCALLS_REQUIRE_FILESYSTEM
-    var stream = FS.getStream(fd);
+    var stream = SYSCALLS.getStreamFromFD(fd);
     var HIGH_OFFSET = 0x100000000; // 2^32
     // use an unsigned operator on low and shift high by 32-bits
     var offset = offset_high * HIGH_OFFSET + (offset_low >>> 0);
@@ -1839,14 +1849,22 @@ if (SYSCALL_DEBUG) {
   }
 }
 
-var WASI_SYSCALLS = set(['fd_write']);
+var WASI_SYSCALLS = set([
+  'fd_write',
+  'fd_read',
+  'fd_seek',
+  'fd_close',
+]);
 
 for (var x in SyscallsLibrary) {
   var which = null; // if this is a musl syscall, its number
   var m = /^__syscall(\d+)$/.exec(x);
+  var wasi = false;
   if (m) {
     which = +m[1];
-  } else if (!(x in WASI_SYSCALLS)) {
+  } else if (x in WASI_SYSCALLS) {
+    wasi = true;
+  } else {
     continue;
   }
   var t = SyscallsLibrary[x];
@@ -1880,8 +1898,12 @@ for (var x in SyscallsLibrary) {
   "  err('error: syscall failed with ' + e.errno + ' (' + ERRNO_MESSAGES[e.errno] + ')');\n" +
   "  canWarn = false;\n";
 #endif
+  if (wasi) {
+    handler += "  return SYSCALLS.getWasiCode(e.errno);\n";
+  } else {
+    handler += "  return -e.errno;\n";
+  }
   handler +=
-  "  return -e.errno;\n" +
   "}\n";
   post = handler + post;
 
