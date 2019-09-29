@@ -713,6 +713,8 @@ class libc(AsanInstrumentedLibrary, MuslInternalLibrary, MTLibrary):
           path_components=['system', 'lib', 'libc', 'musl', 'src', 'env'],
           filenames=['__environ.c', 'getenv.c', 'putenv.c', 'setenv.c', 'unsetenv.c'])
 
+    libc_files.append(shared.path_from_root('system', 'lib', 'libc', 'wasi-helpers.c'))
+
     return libc_files
 
   def get_depends(self):

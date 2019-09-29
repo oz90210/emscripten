@@ -16,11 +16,11 @@ int close(int fd)
 #ifdef __EMSCRIPTEN__
   // FIXME: musl and wasi return codes may differ aside from 0 == success
 	int r = __wasi_fd_close(fd);
-	if (r == __WASI_ESUCCESS || r == __WASI_EINTR) r = 0;
-  else r = -1;
+	if (r == __WASI_EINTR) r = __WASI_ESUCCESS;
+	return __wasi_syscall_ret(r);
 #else
 	int r = __syscall_cp(SYS_close, fd);
 	if (r == -EINTR) r = 0;
-#endif
 	return __syscall_ret(r);
+#endif
 }

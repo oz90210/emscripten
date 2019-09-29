@@ -1901,6 +1901,8 @@ for (var x in SyscallsLibrary) {
   "  canWarn = false;\n";
 #endif
   if (wasi) {
+    // TODO: if not SYSCALLS_REQUIRE_FILESYSTEM then we don't need to
+    //       do this, just 0 or otherwise is enough
     handler += "  return SYSCALLS.getWasiCode(e.errno);\n";
   } else {
     handler += "  return -e.errno;\n";
