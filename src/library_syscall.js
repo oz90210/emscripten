@@ -1458,6 +1458,14 @@ var SyscallsLibrary = {
       return -{{{ cDefine('EOVERFLOW') }}};
     }
 
+    if (whence == {{{ cDefine('SEEK_SET') }}}) {
+      whence = {{{ cDefine('__WASI_WHENCE_SET') }}};
+    } else if (whence == {{{ cDefine('SEEK_CUR') }}}) {
+      whence = {{{ cDefine('__WASI_WHENCE_CUR') }}};
+    } else if (whence == {{{ cDefine('SEEK_END') }}}) {
+      whence = {{{ cDefine('__WASI_WHENCE_END') }}};
+    }
+
     FS.llseek(stream, offset, whence);
     {{{ makeSetValue('newOffset', '0', 'stream.position', 'i64') }}};
     if (stream.getdents && offset === 0 && whence === {{{ cDefine('SEEK_SET') }}}) stream.getdents = null; // reset readdir state

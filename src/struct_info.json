@@ -903,6 +903,15 @@
         ],
         "structs": {}
     },
+    {
+        "file": "wasi/wasi.h",
+        "defines": [
+            "__WASI_WHENCE_SET",
+            "__WASI_WHENCE_CUR",
+            "__WASI_WHENCE_END"
+        ],
+        "structs": {}
+    },
     
     // ===========================================
     // SDL
