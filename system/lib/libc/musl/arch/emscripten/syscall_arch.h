@@ -36,7 +36,7 @@ long __syscall1(int which, ...);
 long __syscall3(int which, ...);
 long __syscall4(int which, ...);
 long __syscall5(int which, ...);
-#define __syscall6(which, fd) (__wasi_fd_close(fd) != __WASI_ESUCCESS)
+long __syscall6(int which, ...);
 long __syscall9(int which, ...);
 long __syscall10(int which, ...);
 long __syscall12(int which, ...);

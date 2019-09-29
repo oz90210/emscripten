@@ -543,8 +543,10 @@ class MuslInternalLibrary(Library):
     ['system', 'lib', 'libc', 'musl', 'arch', 'js'],
   ]
 
-  cflags = ['-D_XOPEN_SOURCE=700']
-
+  cflags = [
+    '-D_XOPEN_SOURCE=700',
+    '-Wno-unused-result',  # system call results are often ignored in musl, and in wasi that warns
+  ]
 
 class AsanInstrumentedLibrary(Library):
   def __init__(self, **kwargs):

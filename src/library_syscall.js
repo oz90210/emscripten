@@ -222,6 +222,8 @@ var SyscallsLibrary = {
 #endif
     },
 
+    // TODO: when we are 100% wasi, we can replace all musl values in
+    // library_fs with wasi, and not need this function.
     getWasiCode: function(code) {
       switch (code) {
         case 0:                        return {{{ cDefine('__WASI_ESUCCESS') }}};
