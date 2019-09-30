@@ -677,6 +677,14 @@ var FILESYSTEM = 1;
 // some JS that does, you might need this.
 var FORCE_FILESYSTEM = 0;
 
+// The list of FS backends to support, which can include
+//  * MEMFS (included by default)
+//  * IDBFS
+//  * NODEFS
+// etc.
+// Will save NODEFS overhead with hello_libcxx.cpp etc.
+var FILESYSTEMS = ['MEMFS'];
+
 // This mode is intended for use with Node.js (and will throw if the build runs
 // in other engines).  The File System API will directly use Node.js API without
 // requiring `FS.mount()`.  The initial working directory will be same as
