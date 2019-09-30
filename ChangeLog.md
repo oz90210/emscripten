@@ -24,6 +24,9 @@ Current Trunk
    unless you use errno defines (like EAGAIN) *and* keep around binaries
    compiled with an older version that you link against. In that case, you
    should rebuild them. See #9545.
+ - Emscripten now supports the config file (.emscripten) being placed in the
+   emscriten directory rather that the current user's home directory.
+   See #9543
 
 v.1.38.46: 09/25/2019
 ---------------------
