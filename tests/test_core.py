@@ -5116,6 +5116,7 @@ main( int argv, char ** argc ) {
     expected = open(path_from_root('tests', 'unistd', 'curdir.out')).read()
     self.do_run(src, expected)
 
+  @also_with_standalone_wasm
   @also_with_noderawfs
   def test_unistd_close(self, js_engines=None):
     src = open(path_from_root('tests', 'unistd', 'close.c')).read()
